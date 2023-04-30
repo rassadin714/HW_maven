@@ -3,48 +3,47 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 public class Application {
     public static void main(String[] args) {
         EmployeeDAO employeeDAO = new EmployeeDAOImpl();
+        CityDAO cityDAO = new CityDAOImpl();
         Scanner scanner = new Scanner(System.in);
 
 
-        System.out.println("Для добавления сотрудника введите следующие данные:");
-        Employee employee = enterInformationWithScanner();
-        employeeDAO.createEmployee(employee);
+        List<Employee> employees = List.of(new Employee("Дмитрий", "Дмитриев", "муж", 19),
+                new Employee("Алина", "Алинова", "жен", 20));
+        City city = new City( "Самара", employees);
+        cityDAO.createCity(city);
 
-
-        System.out.println("Введите id сотрудника для поиска в базе");
+        System.out.println("Введите id города для изменения в базе");
         int id = scanner.nextInt();
-        Employee employee2 = employeeDAO.getEmployeeById(id);
-        if(employee2 == null){
-            System.out.println("сотрудник в базе не найден");
-        } else {
-            System.out.println(employee2);
-        }
+        System.out.println("Какого сотрудника будем изменять? Введите id:");
+        int idEmpl = scanner.nextInt();
+
+        Employee employeeCity = employeeDAO.getEmployeeById(idEmpl);
+        Employee employee1 = enterInformationWithScanner();
+        employee1.setId(employeeCity.getId());
+        cityDAO.updateCityById(id, employee1);
+
+
+        System.out.println("Введите id города для удаления в базе");
+        id = scanner.nextInt();
+        City city11 = cityDAO.getCityById(id);
+        cityDAO.deleteCityById(city11);
 
         System.out.println("Все сотрудники");
-        List<Employee> employees = employeeDAO.getAllEmployees();
-        for (Employee emp: employees){
-            System.out.println(emp);
-        }
+        List<Employee> employees1 = employeeDAO.getAllEmployees();
+        employees1.stream()
+                .forEach(System.out::println);
 
 
-        System.out.println("Введите id сотрудника для изменения в базе");
-        id = scanner.nextInt();
-        Employee employee5 = employeeDAO.getEmployeeById(id);
-        Employee employee1 = enterInformationWithScanner();
-        employee1.setId(employee5.getId());
-        employeeDAO.updateEmployeeById(employee1);
-
-
-
-        System.out.println("Введите id сотрудника для удаления в базе");
-        id = scanner.nextInt();
-        Employee employee4 = employeeDAO.getEmployeeById(id);
-        employeeDAO.deleteEmployeeById(employee4);
+        List<City> cities = cityDAO.getAllCities();
+        cities.stream()
+                .forEach(System.out::println);
 
         HibernateUtil.closeEntityManagerFactory();
 
@@ -60,9 +59,7 @@ public class Application {
         String gender = scanner.nextLine();
         System.out.println("Введите возраст");
         int age = scanner.nextInt();
-        System.out.println("Введите id города");
-        int cityId = scanner.nextInt();
-        Employee employee = new Employee(first_name, last_name, gender,age,cityId);
+        Employee employee = new Employee(first_name, last_name, gender,age);
         return employee;
     }
 }
